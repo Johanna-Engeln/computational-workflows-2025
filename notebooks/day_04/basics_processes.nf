@@ -1,18 +1,101 @@
 params.step = 0
 params.zip = 'zip'
 
-
-process SAYHELLO {
+// Process task 1
+process hello {
     debug true
+    
+    output:
+    path 'hello.txt'
+
+    script:
+    """
+    echo 'Hello world!' > hello.txt
+    """
+}
+process hello2 {
+    debug true
+    
+    output:
+    stdout
+
+    script:
+    """
+    echo "Hello world!"
+    """
 }
 
+// Process task 2
+process SAYHELLO_PYTHON{
+    debug true
 
+    output: 
+    stdout
 
+    script:
+    """
+    python -c "print('Hello World!')"
+    """
+    // Alternative: 
+    // #!/usr/bin/env python
+    // print("Hello World")
+}
+
+// Process task 3
+process SAYHELLO_PARAM{
+    debug true
+
+    input: 
+    val world
+
+    output:
+    stdout
+
+    script: 
+    """
+    echo "$world"
+    """
+
+}
+
+// Process task 4
+process SAYHELLO_FILE{
+    debug true
+
+    input: 
+    val world
+
+    output: 
+    path 'hello.txt'
+
+    script:
+    """
+    echo '$world' > 'hello.txt'
+    """
+}
+
+// Process task 5
+process UPPERCASE {
+    debug true
+
+    input:
+    val world
+
+    output:
+    path 'HELLO.txt'
+
+    script:
+    """
+    upper = \${world^^}
+    echo "\$upper" > HELLO.txt
+    """
+
+}
 workflow {
 
     // Task 1 - create a process that says Hello World! (add debug true to the process right after initializing to be sable to print the output to the console)
     if (params.step == 1) {
-        SAYHELLO()
+        hello2().view()
     }
 
     // Task 2 - create a process that says Hello World! using Python
