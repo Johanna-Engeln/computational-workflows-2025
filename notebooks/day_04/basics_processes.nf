@@ -4,7 +4,7 @@ params.zip = 'zip'
 // Process task 1
 process hello {
     debug true
-    
+    // This output makes a file and is copied from the website
     output:
     path 'hello.txt'
 
@@ -15,7 +15,7 @@ process hello {
 }
 process hello2 {
     debug true
-    
+    // This way the output is printed to the console
     output:
     stdout
 
@@ -75,7 +75,7 @@ process SAYHELLO_FILE{
 }
 
 // Process task 5
-process UPPERCASE {
+process UPPERCASE{
     debug true
 
     input:
@@ -86,16 +86,99 @@ process UPPERCASE {
 
     script:
     """
-    upper = \${world^^}
-    echo "\$upper" > HELLO.txt
+    echo "$world" | tr '[:lower:]' '[:upper:]' > HELLO.txt
     """
 
 }
+
+// Process task 6
+process PRINTUPPER{
+    debug true
+
+    input:
+    path world
+
+    output:
+    stdout
+
+    script:
+    """
+    cat $world
+    """
+}
+
+// Process task 7
+process ZIPPER{
+    debug true
+
+    input:
+    path world
+    val zip
+
+    output:
+    path 'HELLO.*'
+
+    script: 
+    if (zip == 'zip')
+        """
+        zip HELLO.zip $world
+        """
+    else if (zip == 'gzip')
+        """
+        gzip -c $world> HELLO.txt.gz
+        """
+    else if (zip == 'bzip2')
+        """
+        bzip2 -c $world > HELLO.txt.bz2
+        """
+    else
+        error "Unknown compression method: $zip"
+}
+
+// Process task 8
+process ZIPPER_ALL{
+    debug true
+
+    input:
+    path world
+
+    output:
+    path 'HELLO.*'
+
+    script: 
+    """
+    zip HELLO.zip $world
+    gzip -c $world> HELLO.txt.gz
+    bzip2 -c $world > HELLO.txt.bz2
+    """
+}
+
+process WRITETOFILE{
+    debug true
+
+    input:
+    val entry
+
+    output:
+    path "results/names.tsv"
+
+    script:
+    """
+    mkdir -p results
+    echo -e "name\ttitle" > results/names.tsv
+    for row in ${entry.collect {it.name + ":" + it.title }.join(" ") }; do
+        name=\${row%%:*}
+        title=\${row##*:}
+        echo -e "\$name\t\$title" >> results/names.tsv
+    done
+    """
+}
+
 workflow {
 
     // Task 1 - create a process that says Hello World! (add debug true to the process right after initializing to be sable to print the output to the console)
     if (params.step == 1) {
-        hello2().view()
+        hello2()
     }
 
     // Task 2 - create a process that says Hello World! using Python
@@ -134,12 +217,18 @@ workflow {
     //          Print out the path to the zipped file in the console
     if (params.step == 7) {
         greeting_ch = Channel.of("Hello world!")
+        out_ch = UPPERCASE(greeting_ch)
+        ZIPPER(out_ch, params.zip)
     }
 
     // Task 8 - Create a process that zips the file created in the UPPERCASE process in "zip", "gzip" AND "bzip2" format. Print out the paths to the zipped files in the console
 
     if (params.step == 8) {
         greeting_ch = Channel.of("Hello world!")
+        txt_ch = UPPERCASE(greeting_ch)
+        out_ch = ZIPPER_ALL(txt_ch)
+        out_ch.view{files ->
+            "Created files:\n" + files.join('\n')}
     }
 
     // Task 9 - Create a process that reads in a list of names and titles from a channel and writes them to a file.
@@ -156,9 +245,8 @@ workflow {
             ['name': 'Dobby', 'title': 'hero'],
         )
 
-        in_ch
-            | WRITETOFILE
-            // continue here
+        out_ch = WRITETOFILE(in_ch.toList())
+        out_ch.view()
     }
 
 }

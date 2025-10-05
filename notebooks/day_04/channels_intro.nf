@@ -56,7 +56,9 @@ workflow{
     // Task 6 - go back to the time when you included all files. Are you sure that really ALL files are included? If not, how can you include them?
 
     if (params.step == 6) {
-        out_ch = channel.fromPath(['files_dir/.*', 'files_dir/*'])
+        // Here both ways work
+        //out_ch = channel.fromPath(['files_dir/.*', 'files_dir/*'])
+        out_ch = channel.fromPath( 'files_dir/*', hidden: true )
     }
 
     // Task 7 - get all filepairs in the "files_dir" directory

@@ -35,14 +35,17 @@ workflow{
 
     if (params.step == 5) {
         in_ch = channel.of(2,3,4)
-        in_ch.map{ it -> it * it }.take(2).view()    
+        in_ch.map{v -> v * v}.take(2).view()    
     }
 
     // Task 6 - Remember when you used bash to reverse the output? Try to use map and Groovy to reverse the output
 
     if (params.step == 6) {  
         in_ch = channel.of('Taylor', 'Swift')
-        in_ch.map{v -> v.reverse()}.view()
+        // This turns around each name
+        //in_ch.map{v -> v.reverse()}.view()
+        // This turns around the items in the channel
+        in_ch.toList().map{v -> v.reverse()}.flatMap{v -> v}.view()
     }
 
     // Task 7 - Use fromPath to include all fastq files in the "files_dir" directory, then use map to return a pair containing the file name and the file path (Hint: include groovy code)
@@ -75,8 +78,6 @@ workflow{
         in_ch.toList().view()
     }
     
-
-
     // Task 11 -  From the input channel, create lists where each first item in the list of lists is the first item in the output channel, followed by a list of all the items its paired with
     // e.g. 
     // in: [[1, 'A'], [1, 'B'], [1, 'C'], [2, 'D'], [2, 'E'], [3, 'F']]
@@ -100,12 +101,22 @@ workflow{
 
     if (params.step == 13) {
         in_ch = channel.of(1,2,3,4,5,6,7,8,9,10)
+        /* This worked using filter
         even_ch = in_ch.filter{it % 2 == 0}
         odd_ch  = in_ch.filter{it % 2 != 0}
 
         even_ch.toList().view {"Even numbers:" + it}
         odd_ch.toList().view {"Odd numbers:" + it}
+        */
 
+        // Alternative using the branch operator
+        in_ch.branch {v ->
+            even: v % 2 == 0
+            odd: v % 2 != 0}
+        .set{result}
+
+        result.even.collect().view {"Evne numbers:" + it}
+        result.odd.collect().view {"Odd numbers:" + it}
     }
 
     // Task 14 - Nextflow has the concept of maps. Write the names in the maps in this channel to a file called "names.txt". Each name should be on a new line. 
@@ -124,13 +135,8 @@ workflow{
         
         new File("results").mkdirs()
 
-        in_ch.map{it.name}.toList().subscribe { names -> 
-            new File("results/names.txt").withWriter { w ->
-                names.each { w.println(it) }
-            }
+        in_ch.map{it.name}.toList().subscribe{names -> 
+            new File("results/names.txt").text = names.join('\n') + '\n'
         }
-    
     }
-
-
 }
