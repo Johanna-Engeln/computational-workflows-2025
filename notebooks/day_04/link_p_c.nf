@@ -25,7 +25,6 @@ process SPLITLETTERS {
         i=\$(( \$i + \$block_size ))
     done
     """
-
 } 
 
 process CONVERTTOUPPER {

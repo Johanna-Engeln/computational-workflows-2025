@@ -18,8 +18,9 @@ workflow{
         in_ch = channel.fromPath('samplesheet.csv')
             .splitCsv(header: true)
             .map { row -> 
-                [[sample: row.sample, strandedness: row.strandedness], 
-                [row.fastq_1, row.fastq_2]]}
+                def meta = [sample: row.sample, strandedness: row.strandedness]
+                def file = [row.fastq_1, row.fastq_2]
+                [meta, file]}
         
         in_ch.view()
     }
@@ -31,8 +32,9 @@ workflow{
         in_ch = channel.fromPath('samplesheet.csv')
             .splitCsv(header: true)
             .map { row -> 
-                [[sample: row.sample, strandedness: row.strandedness], 
-                [row.fastq_1, row.fastq_2]]}
+                def meta = [sample: row.sample, strandedness: row.strandedness]
+                def file = [row.fastq_1, row.fastq_2]
+                [meta, file]}
 
         split_ch = in_ch.branch {sample ->
             forward: sample[0].strandedness == 'forward'
