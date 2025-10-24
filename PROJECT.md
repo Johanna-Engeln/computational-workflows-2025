@@ -4,7 +4,7 @@ Student1: \<Francesco Barlow>
 
 Student2: \<Johanna Engeln>
 
-Project Github url: \<github-url> 
+Project Github url: \<https://github.com/frankiebar1/rnaseqy> 
 
 
 # Next steps
