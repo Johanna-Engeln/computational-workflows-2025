@@ -1,10 +1,10 @@
 # Fill out your Project Information
 
-Student1: \<name-1>
+Student1: \<Francesco Barlow>
 
-Student2: \<name-2>
+Student2: \<Johanna Engeln>
 
-Project Github url: \<github-url> 
+Project Github url: \<https://github.com/frankiebar1/rnaseqy>
 
 
 # Next steps
